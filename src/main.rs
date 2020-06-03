@@ -2,9 +2,10 @@ pub mod utils;
 pub mod models;
 
 use std::fs::File;
-use std::env::{args};
 
 use std::io::{BufReader};
+
+use clap::{Arg, App};
 
 use utils::{bytes, bytes::{Bytes, ContinuousReader}};
 
@@ -14,8 +15,40 @@ use models::v2::header::{Header, Flags};
 use models::v2::frames::*;
 
 fn main() {
-    let mut reader = BufReader::new(select_file().expect(""));
-    let mut bytes = Bytes::from_reader(&mut reader).expect("a");
+	let matches = App::new("ID3 Reader")
+	.arg(Arg::with_name("file")
+			 .short("f")
+			 .long("file")
+			 .takes_value(true)
+			 .required(true)
+			 .help("The file to be parsed"))
+	.get_matches();
+
+	let file_name = matches.value_of("file");
+	if file_name.is_none() {
+		println!("Please specify the file to be parsed with --file <name>");
+		return
+	}
+
+	let file_name = file_name.unwrap();
+
+	let file = match File::open(file_name) {
+		Ok(file) => file,
+		Err(err) => {
+			println!("Could not open file, {:?}", err);
+			return
+		}
+	};
+
+	let mut reader = BufReader::new(file);
+	
+    let mut bytes = match Bytes::from_reader(&mut reader) {
+		Ok(bytes) => bytes,
+		Err(err) => {
+			println!("Could not read file, {:?}", err);
+			return
+		}
+	};
 
     let version = read_version(&mut bytes);
     if version.is_none() {
@@ -68,19 +101,6 @@ fn main() {
     for x in frames {
         println!("{:#?}", x.frame_type);
     }
-}
-
-pub fn select_file() -> Result<File, String> {
-    let args_vec: Vec<String> = args().collect();
-
-    if args_vec.len() < 2 {
-        return Result::Err("First command arg should be the file to be selected".to_string())
-    }
-
-    Ok(
-        File::open(&args_vec[1])
-            .expect("Could not open file")
-    )
 }
 
 fn read_version(bytes: &mut Bytes) -> Option<Version> {
