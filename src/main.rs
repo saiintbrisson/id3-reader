@@ -8,8 +8,10 @@ use std::io::{BufReader};
 
 use utils::{bytes, bytes::{Bytes, ContinuousReader}};
 
-use models::{Version, header::{Header, Flags}};
-use models::frames::*;
+use models::Version;
+
+use models::v2::header::{Header, Flags};
+use models::v2::frames::*;
 
 fn main() {
     let mut reader = BufReader::new(select_file().expect(""));
@@ -39,7 +41,7 @@ fn main() {
         let mut flags: [u8; 2] = [0; 2];
         bytes.read_to_slice(&mut flags);
 
-        let value = models::frames::parse_frame_body(&mut bytes, &id, size);
+        let value = parse_frame_body(&mut bytes, &id, size);
         if value.is_none() {
             continue;
         }

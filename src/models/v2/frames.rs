@@ -1,5 +1,5 @@
 use crate::bytes::{Bytes, ContinuousReader, decode_text};
-use crate::models::frames::FrameType::*;
+use self::FrameType::*;
 
 #[derive(Debug)]
 pub struct Frame {

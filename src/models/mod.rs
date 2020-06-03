@@ -1,12 +1,5 @@
-pub mod frames;
-pub mod header;
+pub mod v1;
+pub mod v2;
 
-#[derive(Debug)]
-pub struct Version {
-
-    pub tag: String,
-    pub major: u8,
-    pub minor: u8,
-    pub revision: u8
-
-}
+pub mod version;
+pub use version::Version;
