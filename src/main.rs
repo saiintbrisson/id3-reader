@@ -1,4 +1,4 @@
-pub mod bytes;
+pub mod utils;
 pub mod models;
 
 use std::fs::File;
@@ -6,7 +6,7 @@ use std::env::{args};
 
 use std::io::{BufReader};
 
-use bytes::{Bytes, ContinuousReader};
+use utils::{bytes, bytes::{Bytes, ContinuousReader}};
 
 use models::{Version, header::{Header, Flags}};
 use models::frames::*;
