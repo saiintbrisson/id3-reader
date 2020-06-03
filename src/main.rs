@@ -32,7 +32,7 @@ fn main() {
 
 	let file_name = file_name.unwrap();
 
-	let file = match File::open(file_name) {
+	let mut file = match File::open(file_name) {
 		Ok(file) => file,
 		Err(err) => {
 			println!("Could not open file, {:?}", err);
@@ -40,21 +40,15 @@ fn main() {
 		}
 	};
 
-	let mut reader = BufReader::new(file);
-	
-    let mut bytes = match Bytes::from_reader(&mut reader) {
-		Ok(bytes) => bytes,
-		Err(err) => {
-			println!("Could not read file, {:?}", err);
-			return
-		}
-	};
-
-    let version = read_version(&mut bytes);
-    if version.is_none() {
+    let version = read_version(&mut file);
+    if version.0.is_none() || version.1.is_none() {
+		println!("Invalid ID3 file");
         return
     }
-    let version = version.unwrap();
+	let mut bytes = version.0.unwrap();
+	let version = version.1.unwrap();
+	
+	println!("{:#?}", version);
 
     let flags = read_header_flags(bytes.read_byte());
 
@@ -95,7 +89,6 @@ fn main() {
         flags, size: size as u32
     };
 
-    println!("{:#?}", version);
     println!("{:#?}", header);
 
     for x in frames {
@@ -103,18 +96,72 @@ fn main() {
     }
 }
 
-fn read_version(bytes: &mut Bytes) -> Option<Version> {
+use std::io::{Seek, SeekFrom};
+
+fn read_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
+	let version = get_v2_version(file);
+	if version.1.is_some() {
+		return version
+	}
+	
+	get_v1_version(file)
+}
+
+pub fn get_v2_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
+	let mut reader = BufReader::new(file);
+	
+    let mut bytes = match Bytes::from_reader(&mut reader) {
+		Ok(bytes) => bytes,
+		Err(err) => {
+			println!("Could not read file, {:?}", err);
+			return (None, None)
+		}
+	};
+
+
     let version = bytes.read_utf8(3);
     if version.is_err() {
-        return None
-    }
-    
-    Some(Version {
-        tag: version.unwrap(),
-        major: 2,
-        minor: bytes.read_byte(),
-        revision: bytes.read_byte()
-    })
+        return (Some(bytes), None)
+	}
+	
+	let tag = version.unwrap();
+	if tag != "ID3" {
+		return (Some(bytes), None)
+	}
+
+	let version = Some(Version {
+		tag,
+		major: 2,
+		minor: bytes.read_byte(),
+		revision: bytes.read_byte()
+	});
+
+	(Some(bytes), version)
+}
+
+pub fn get_v1_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
+    file.seek(SeekFrom::End(-128))
+        .expect("Could not perform IO operation");
+
+	let mut reader = BufReader::new(file);
+    let mut bytes = Bytes::from_reader(&mut reader).unwrap();
+
+	let tag = bytes.read_utf8(3).ok();
+	if tag.is_none() {
+		return (Some(bytes), None)
+	}
+
+	let tag = tag.unwrap();
+	if tag != "TAG" {
+		return (Some(bytes), None)
+	}
+
+    (Some(bytes), Some(Version {
+        tag,
+        major: 1,
+        minor: 0,
+        revision: 0
+    }))
 }
 
 fn read_header_flags(byte: u8) -> Flags {

@@ -36,6 +36,16 @@ impl Bytes {
         })
     }
 
+    pub fn override_buf<T: Read>(&mut self, reader: &mut BufReader<T>) -> Result<(), Error> {
+        let mut buffer = reader.buffer();
+        if buffer.is_empty() {
+            buffer = reader.fill_buf()?;
+		}
+		
+		self.buf = Vec::from(buffer);
+		Ok(())
+    }
+
     pub fn get_buf(&self) -> &Vec<u8> {
         &self.buf
     }
