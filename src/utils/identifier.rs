@@ -14,11 +14,23 @@ pub fn get_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
 }
 
 pub fn get_v1_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
-    file.seek(SeekFrom::End(-128))
-        .expect("Could not perform IO operation");
+    match file.seek(SeekFrom::End(-128)) {
+        Ok(_) => {}
+        Err(err) => {
+            println!("Could not read file, {:?}", err);
+            return (None, None)
+        }
+    }
 
     let mut reader = BufReader::new(file);
-    let mut bytes = Bytes::from_reader(&mut reader).unwrap();
+
+    let mut bytes = match Bytes::from_reader(&mut reader) {
+        Ok(bytes) => bytes,
+        Err(err) => {
+            println!("Could not read file, {:?}", err);
+            return (None, None)
+        }
+    };
 
     let tag = bytes.read_utf8(3).ok();
     if tag.is_none() {
