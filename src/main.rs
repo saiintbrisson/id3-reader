@@ -5,14 +5,9 @@ pub mod readers;
 pub mod utils;
 
 use std::fs::File;
-
 use clap::{Arg, App};
 
-use utils::{bytes, bytes::ContinuousReader, identifier::get_version};
-
-use models::v2::header::{Header, Flags};
-use models::v2::frames::*;
-
+use utils::{bytes, identifier::get_version};
 use readers::v2;
 
 fn main() {
@@ -50,10 +45,9 @@ fn main() {
     let mut bytes = version.0.unwrap();
     let version = version.1.unwrap();
 
-    if !version.is_v2() {
-        println!("ID3v1 is currently not supported");
-        return
+    if version.is_v2() {
+        println!("{:#?}", v2::read_id3v2(version, &mut bytes));
+    } else {
+        println!("ID3v1 is not currently supported");
     }
-    
-    println!("{:#?}", v2::read_id3v2(version, &mut bytes));
 }

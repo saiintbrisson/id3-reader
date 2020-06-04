@@ -41,14 +41,15 @@ fn read_frame(mut bytes: &mut Bytes) -> Option<Frame> {
     if value.is_none() {
         return None
     }
+    
     let value = value.unwrap();
 
     let frame_type = FrameType::from_slice(&id, value);
     if frame_type.is_none() {
         return None
     }
-    let frame_type = frame_type.unwrap();
 
+    let frame_type = frame_type.unwrap();
     let frame_flags = read_frame_flags(flags);
 
     Some(Frame { frame_type, frame_flags, size: size as u32 })
