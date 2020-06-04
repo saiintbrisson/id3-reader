@@ -99,7 +99,7 @@ pub trait IndexedReader {
     fn read_until_null(&self, from: usize, to: usize) -> &[u8];
     
     fn read_unsigned(&self, from: usize, to: usize) -> u128;
-    fn read_signed(&self, from: usize, to: usize) -> u128;
+    fn read_signed(&self, from: usize, to: usize) -> i128;
 
     fn read_latin1(&self, from: usize, to: usize) -> String;
     fn read_utf8(&self, from: usize, to: usize) -> Result<String, FromUtf8Error>;
@@ -122,7 +122,7 @@ pub trait ContinuousReader {
     fn read_until_null(&mut self, length: usize) -> &[u8];
 
     fn read_unsigned(&mut self, length: usize) -> u128;
-    fn read_signed(&mut self, length: usize) -> u128;
+    fn read_signed(&mut self, length: usize) -> i128;
 
     fn read_latin1(&mut self, length: usize) -> String;
     fn read_utf8(&mut self, length: usize) -> Result<String, FromUtf8Error>;
@@ -168,7 +168,7 @@ impl IndexedReader for Bytes {
         convert_unsigned(self.read_slice(from, to))
     }
 
-    fn read_signed(&self, from: usize, to: usize) -> u128 {
+    fn read_signed(&self, from: usize, to: usize) -> i128 {
         convert_signed(self.read_slice(from, to))
     }
 
@@ -230,7 +230,7 @@ impl ContinuousReader for Bytes {
         convert_unsigned(self.read_slice(length))
     }
     
-    fn read_signed(&mut self, length: usize) -> u128 {
+    fn read_signed(&mut self, length: usize) -> i128 {
         convert_signed(self.read_slice(length))
     }
 
@@ -278,22 +278,30 @@ pub fn convert_unsigned(slice: &[u8]) -> u128 {
     result
 }
 
-pub fn convert_signed(slice: &[u8]) -> u128 {
+pub fn convert_signed(slice: &[u8]) -> i128 {
     let mut result = 0;
 
     for i in 0..slice.len() {
         result |= ((slice[i] & 0x7F) as u128) << 7 * (slice.len()  - (i + 1)) as u128;
     }
 
-    result
+    result as i128
 }
 
 pub fn convert_latin1(slice: &[u8]) -> String {
-    slice.iter().map(|&c| c as char).collect()
+    slice.iter()
+        .map(|&c| c as char)
+        .filter(|byte| *byte as u8 != 0)
+        .collect()
 }
 
 pub fn convert_utf8(slice: &[u8]) -> Result<String, FromUtf8Error> {
-   String::from_utf8(slice.into())
+   String::from_utf8(
+       slice.iter()
+                .map(|byte| *byte)
+                .filter(|byte| *byte != 0)
+                .collect::<Vec<u8>>()
+    )
 }
 
 pub fn convert_utf16(slice: &[u8]) -> Result<String, FromUtf16Error> {

@@ -8,7 +8,7 @@ use std::fs::File;
 use clap::{Arg, App};
 
 use utils::{bytes, identifier::get_version};
-use readers::v2;
+use readers::{v1, v2};
 
 fn main() {
     let matches = App::new("ID3 Reader")
@@ -48,6 +48,6 @@ fn main() {
     if version.is_v2() {
         println!("{:#?}", v2::read_id3v2(version, &mut bytes));
     } else {
-        println!("ID3v1 is not currently supported");
+        println!("{:#?}", v1::read_id3v1(version, &mut bytes));
     }
 }
