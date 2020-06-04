@@ -1,2 +1,7 @@
 /target
 Cargo.lock
+
+id3v1.mp3
+id3v2.mp3
+
+output.txt
