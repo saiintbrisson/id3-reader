@@ -298,9 +298,9 @@ pub fn convert_latin1(slice: &[u8]) -> String {
 pub fn convert_utf8(slice: &[u8]) -> Result<String, FromUtf8Error> {
    String::from_utf8(
        slice.iter()
-            .map(|byte| *byte)
-            .filter(|byte| *byte != 0)
-            .collect::<Vec<u8>>()
+                .map(|byte| *byte)
+                .filter(|byte| *byte != 0)
+                .collect::<Vec<u8>>()
     )
 }
 

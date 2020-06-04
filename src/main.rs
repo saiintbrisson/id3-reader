@@ -49,6 +49,5 @@ fn main() {
         println!("{:#?}", v2::read_id3v2(version, &mut bytes));
     } else {
         println!("{:#?}", v1::read_id3v1(version, &mut bytes));
-        println!("ID3v1 is not currently supported");
     }
 }

@@ -8,7 +8,7 @@ pub struct ID3v1 {
     pub name: String,
     pub artist: String,
     pub album: String,
-    pub year: i32,
+    pub year: String,
     pub comment: String,    
     pub genre: i8,    
 
