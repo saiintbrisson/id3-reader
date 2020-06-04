@@ -7,3 +7,11 @@ pub struct Version {
     pub revision: u8
 
 }
+
+impl Version {
+
+    pub fn is_v2(&self) -> bool {
+        self.tag == "ID3"
+    }
+
+}
