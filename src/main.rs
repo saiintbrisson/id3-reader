@@ -129,14 +129,14 @@ pub fn get_v2_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
 		return (Some(bytes), None)
 	}
 
-	let version = Some(Version {
+	let version = Version {
 		tag,
 		major: 2,
 		minor: bytes.read_byte(),
 		revision: bytes.read_byte()
-	});
+	};
 
-	(Some(bytes), version)
+	(Some(bytes), Some(version))
 }
 
 pub fn get_v1_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
@@ -156,12 +156,14 @@ pub fn get_v1_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
 		return (Some(bytes), None)
 	}
 
-    (Some(bytes), Some(Version {
+	let version = Version {
         tag,
         major: 1,
         minor: 0,
         revision: 0
-    }))
+	};
+
+    (Some(bytes), Some(version))
 }
 
 fn read_header_flags(byte: u8) -> Flags {
