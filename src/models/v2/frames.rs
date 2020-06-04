@@ -14,14 +14,14 @@ pub struct Frame {
 pub struct FrameFlags {
 
     pub discard: bool,
-	pub read_only: bool,
-	
-	pub has_id: bool,
+    pub read_only: bool,
+    
+    pub has_id: bool,
 
     pub compressed: bool,
     pub encrypted: bool,
-	pub unsynchronized: bool,
-	pub has_indicator: bool
+    pub unsynchronized: bool,
+    pub has_indicator: bool
 
 }
 
@@ -71,7 +71,7 @@ impl FrameType {
 
             COMM(_) => "Comments"
         }.to_string()
-	}
+    }
 
     pub fn get_value(&self) -> String {
         match self {
@@ -96,13 +96,13 @@ pub fn parse_frame_body(bytes: &mut Bytes, id: &[u8], size: usize) -> Option<Str
             bytes.read_text(size)
         }
     } else if id == [b'C', b'O', b'M', b'M'] {
-		let encoding = bytes.read_byte();
-		
-		bytes.read_latin1(3);
-		let desc_size = bytes.get_next_null() + 2;
+        let encoding = bytes.read_byte();
+        
+        bytes.read_latin1(3);
+        let desc_size = bytes.get_next_null() + 2;
 
-		let desc = bytes.read_slice(size - desc_size);
-		decode_text(desc, encoding)
+        let desc = bytes.read_slice(size - desc_size);
+        decode_text(desc, encoding)
     } else {
         None
     }

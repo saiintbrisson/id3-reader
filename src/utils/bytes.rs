@@ -40,10 +40,10 @@ impl Bytes {
         let mut buffer = reader.buffer();
         if buffer.is_empty() {
             buffer = reader.fill_buf()?;
-		}
-		
-		self.buf = Vec::from(buffer);
-		Ok(())
+        }
+        
+        self.buf = Vec::from(buffer);
+        Ok(())
     }
 
     pub fn get_buf(&self) -> &Vec<u8> {
@@ -94,8 +94,8 @@ pub trait IndexedReader {
 
     fn get_next_null(&self, from: usize) -> usize;
 
-	fn read_slice(&self, from: usize, to: usize) -> &[u8];
-	fn read_to_slice(&self, from: usize, slice: &mut [u8]);
+    fn read_slice(&self, from: usize, to: usize) -> &[u8];
+    fn read_to_slice(&self, from: usize, slice: &mut [u8]);
     fn read_until_null(&self, from: usize, to: usize) -> &[u8];
     
     fn read_unsigned(&self, from: usize, to: usize) -> u128;
@@ -117,8 +117,8 @@ pub trait ContinuousReader {
 
     fn get_next_null(&self) -> usize;
 
-	fn read_slice(&mut self, length: usize) -> &[u8];
-	fn read_to_slice(&mut self, slice: &mut [u8]);
+    fn read_slice(&mut self, length: usize) -> &[u8];
+    fn read_to_slice(&mut self, slice: &mut [u8]);
     fn read_until_null(&mut self, length: usize) -> &[u8];
 
     fn read_unsigned(&mut self, length: usize) -> u128;
@@ -151,13 +151,13 @@ impl IndexedReader for Bytes {
     }
 
     fn read_to_slice(&self, from: usize, slice: &mut [u8]) {
-		for i in 0..slice.len() {
-			if from + i > self.buf.len() {
-				break
-			}
+        for i in 0..slice.len() {
+            if from + i > self.buf.len() {
+                break
+            }
 
-			slice[i] = self.buf.as_slice()[from];
-		}
+            slice[i] = self.buf.as_slice()[from];
+        }
     }
 
     fn read_until_null(&self, from: usize, to: usize) -> &[u8] {
@@ -212,14 +212,14 @@ impl ContinuousReader for Bytes {
     }
 
     fn read_to_slice(&mut self, slice: &mut [u8]) {
-		for i in 0..slice.len() {
-			if self.index + i > self.buf.len() {
-				break
-			}
+        for i in 0..slice.len() {
+            if self.index + i > self.buf.len() {
+                break
+            }
 
-			slice[i] = self.buf.as_slice()[self.index];
-			self.index += 1;
-		}
+            slice[i] = self.buf.as_slice()[self.index];
+            self.index += 1;
+        }
     }
 
     fn read_until_null(&mut self, length: usize) -> &[u8] {
@@ -273,7 +273,7 @@ pub fn convert_unsigned(slice: &[u8]) -> u128 {
 
     for i in 0..slice.len() {
         result |= (slice[i] as u128) << 8 * (slice.len()  - (i + 1)) as u128;
-	}
+    }
 
     result
 }
@@ -300,11 +300,11 @@ pub fn convert_utf16(slice: &[u8]) -> Result<String, FromUtf16Error> {
     let vec = slice.chunks_exact(2)
         .into_iter()
         .map(|byte| u16::from_ne_bytes([byte[0], byte[1]]))
-		.filter(|byte| {
-			byte >= &(0x20 as u16) 
-				&& byte != &(0xFEFF as u16) 
-				&& byte != &(0xFFFE as u16)
-		})
+        .filter(|byte| {
+            byte >= &(0x20 as u16) 
+                && byte != &(0xFEFF as u16) 
+                && byte != &(0xFFFE as u16)
+        })
         .collect::<Vec<u16>>();
 
     String::from_utf16(vec.as_slice())

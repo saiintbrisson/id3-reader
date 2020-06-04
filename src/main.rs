@@ -15,40 +15,41 @@ use models::v2::header::{Header, Flags};
 use models::v2::frames::*;
 
 fn main() {
-	let matches = App::new("ID3 Reader")
-	.arg(Arg::with_name("file")
-			 .short("f")
-			 .long("file")
-			 .takes_value(true)
-			 .required(true)
-			 .help("The file to be parsed"))
-	.get_matches();
+    let matches = App::new("ID3 Reader")
+    .arg(Arg::with_name("file")
+             .short("f")
+             .long("file")
+             .takes_value(true)
+             .required(true)
+             .help("The file to be parsed"))
+    .get_matches();
 
-	let file_name = matches.value_of("file");
-	if file_name.is_none() {
-		println!("Please specify the file to be parsed with --file <name>");
-		return
-	}
+    let file_name = matches.value_of("file");
+    if file_name.is_none() {
+        println!("Please specify the file to be parsed with --file <name>");
+        return
+    }
 
-	let file_name = file_name.unwrap();
+    let file_name = file_name.unwrap();
 
-	let mut file = match File::open(file_name) {
-		Ok(file) => file,
-		Err(err) => {
-			println!("Could not open file, {:?}", err);
-			return
-		}
-	};
+    let mut file = match File::open(file_name) {
+        Ok(file) => file,
+        Err(err) => {
+            println!("Could not open file, {:?}", err);
+            return
+        }
+    };
 
     let version = read_version(&mut file);
     if version.0.is_none() || version.1.is_none() {
-		println!("Invalid ID3 file");
+        println!("Invalid ID3 file");
         return
     }
-	let mut bytes = version.0.unwrap();
-	let version = version.1.unwrap();
-	
-	println!("{:#?}", version);
+    
+    let mut bytes = version.0.unwrap();
+    let version = version.1.unwrap();
+    
+    println!("{:#?}", version);
 
     let flags = read_header_flags(bytes.read_byte());
 
@@ -99,69 +100,69 @@ fn main() {
 use std::io::{Seek, SeekFrom};
 
 fn read_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
-	let version = get_v2_version(file);
-	if version.1.is_some() {
-		return version
-	}
-	
-	get_v1_version(file)
+    let version = get_v2_version(file);
+    if version.1.is_some() {
+        return version
+    }
+    
+    get_v1_version(file)
 }
 
 pub fn get_v2_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
-	let mut reader = BufReader::new(file);
-	
+    let mut reader = BufReader::new(file);
+    
     let mut bytes = match Bytes::from_reader(&mut reader) {
-		Ok(bytes) => bytes,
-		Err(err) => {
-			println!("Could not read file, {:?}", err);
-			return (None, None)
-		}
-	};
+        Ok(bytes) => bytes,
+        Err(err) => {
+            println!("Could not read file, {:?}", err);
+            return (None, None)
+        }
+    };
 
 
     let version = bytes.read_utf8(3);
     if version.is_err() {
         return (Some(bytes), None)
-	}
-	
-	let tag = version.unwrap();
-	if tag != "ID3" {
-		return (Some(bytes), None)
-	}
+    }
+    
+    let tag = version.unwrap();
+    if tag != "ID3" {
+        return (Some(bytes), None)
+    }
 
-	let version = Version {
-		tag,
-		major: 2,
-		minor: bytes.read_byte(),
-		revision: bytes.read_byte()
-	};
+    let version = Version {
+        tag,
+        major: 2,
+        minor: bytes.read_byte(),
+        revision: bytes.read_byte()
+    };
 
-	(Some(bytes), Some(version))
+    (Some(bytes), Some(version))
 }
 
 pub fn get_v1_version(file: &mut File) -> (Option<Bytes>, Option<Version>) {
     file.seek(SeekFrom::End(-128))
         .expect("Could not perform IO operation");
 
-	let mut reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
     let mut bytes = Bytes::from_reader(&mut reader).unwrap();
 
-	let tag = bytes.read_utf8(3).ok();
-	if tag.is_none() {
-		return (Some(bytes), None)
-	}
+    let tag = bytes.read_utf8(3).ok();
+    if tag.is_none() {
+        return (Some(bytes), None)
+    }
 
-	let tag = tag.unwrap();
-	if tag != "TAG" {
-		return (Some(bytes), None)
-	}
+    let tag = tag.unwrap();
+    if tag != "TAG" {
+        return (Some(bytes), None)
+    }
 
-	let version = Version {
+    let version = Version {
         tag,
         major: 1,
         minor: 0,
         revision: 0
-	};
+    };
 
     (Some(bytes), Some(version))
 }
