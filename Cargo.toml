@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "mp3-decoders",
-    "mp3-decoders/id3-decoder",
-    "mp3-decoders/mp3-decoder"
+    "id3-reader",
+    "mp3-reader"
 ]
