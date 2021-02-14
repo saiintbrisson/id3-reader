@@ -40,7 +40,7 @@ mod tests {
 
     #[test]
     fn test_id3_v1() {
-        let entries: Vec<_> = read_dir("H:\\Music")
+        let entries: Vec<_> = read_dir("../../")
             .unwrap()
             .filter_map(Result::ok)
             .collect();
