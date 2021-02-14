@@ -3,7 +3,7 @@ pub struct Header {
     pub version: (u8, u8),
     pub header_flags: HeaderFlags,
     pub size: i32,
-    pub extended_header: Option<ExtendedHeader>
+    pub extended_header: Option<ExtendedHeader>,
 }
 
 bitflags! {
@@ -20,7 +20,7 @@ pub struct ExtendedHeader {
     pub extended_header_size: u32,
     pub extended_flags: ExtendedHeaderFlags,
     pub padding_size: u32,
-    pub total_frame_crc: u32
+    pub total_frame_crc: u32,
 }
 
 bitflags! {

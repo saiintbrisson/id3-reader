@@ -1,5 +1,5 @@
 [package]
-name = "id3-decoder"
+name = "id3-reader"
 version = "0.1.0"
 authors = ["SaiintBrisson <luizcarlosmpc@gmail.com>"]
 edition = "2018"

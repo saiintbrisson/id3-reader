@@ -1,9 +1,11 @@
 use bytes::{Buf, Bytes};
 use std::io::{Error, ErrorKind, Read, Result, Seek, SeekFrom};
 
-use crate::{ID3v1, buf_ext::BufExt};
+use crate::{buf_ext::BufExt, encoding::EncodingTypes, ID3v1};
 
 use super::ID3v1Ext;
+
+const ENCODING: EncodingTypes = EncodingTypes::Latin1;
 
 pub fn read<R: Read + Seek>(src: &mut R) -> Result<ID3v1> {
     src.seek(SeekFrom::End(-128))?;
@@ -48,11 +50,11 @@ fn read_bytes(mut bytes: &mut Bytes) -> Result<ID3v1> {
 }
 
 fn read_tag(bytes: &mut Bytes) -> ID3v1 {
-    let song_name = bytes.get_latin1_string(30);
-    let artist = bytes.get_latin1_string(30);
-    let album_name = bytes.get_latin1_string(30);
-    let year = bytes.get_latin1_string(4);
-    
+    let song_name = bytes.get_sized_string(&ENCODING, 30);
+    let artist = bytes.get_sized_string(&ENCODING, 30);
+    let album_name = bytes.get_sized_string(&ENCODING, 30);
+    let year = bytes.get_sized_string(&ENCODING, 4);
+
     let mut comment = vec![0u8; 30];
     bytes.copy_to_slice(&mut comment);
 
@@ -74,17 +76,17 @@ fn read_tag(bytes: &mut Bytes) -> ID3v1 {
 }
 
 fn read_tag_ext(bytes: &mut Bytes) -> ID3v1Ext {
-    let song_name = bytes.get_latin1_string(30);
-    let artist = bytes.get_latin1_string(30);
-    let album_name = bytes.get_latin1_string(30);
-    let comment = bytes.get_latin1_string(15);
-    let sub_genre = bytes.get_latin1_string(20);
+    let song_name = bytes.get_sized_string(&ENCODING, 30);
+    let artist = bytes.get_sized_string(&ENCODING, 30);
+    let album_name = bytes.get_sized_string(&ENCODING, 30);
+    let comment = bytes.get_sized_string(&ENCODING, 15);
+    let sub_genre = bytes.get_sized_string(&ENCODING, 20);
 
     ID3v1Ext {
         song_name,
         artist,
         album_name,
         comment,
-        sub_genre
+        sub_genre,
     }
 }

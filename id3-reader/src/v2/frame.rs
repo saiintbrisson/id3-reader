@@ -1,8 +1,6 @@
 use bytes::{Buf, Bytes};
 
-use crate::buf_ext::BufExt;
-
-use super::EncodingTypes;
+use crate::{buf_ext::BufExt, encoding::EncodingTypes};
 
 #[derive(Debug)]
 pub struct Frame {
@@ -19,7 +17,7 @@ pub enum FrameType {
     TYER(String),
     TCON(String),
     TXXX(String),
-    COMM([u8; 3], String, String)
+    COMM([u8; 3], String, String),
 }
 
 macro_rules! decode_text_frame {
@@ -43,23 +41,14 @@ impl FrameType {
                 let mut language = [0u8; 3];
                 src.copy_to_slice(&mut language);
 
-                let pos = match encoding {
-                    EncodingTypes::Utf16Le | EncodingTypes::Utf16Be => src.find_null_u16(),
-                    _ => src.find_null_u8()
-                };
-                let short = encoding.decode(&src[..pos]);
-                src.advance(pos + 2);
+                let short = src.get_encoded_string(&encoding);
+                src.advance(2);
 
-                let pos = match encoding {
-                    EncodingTypes::Utf16Le | EncodingTypes::Utf16Be => src.find_null_u16(),
-                    _ => src.find_null_u8()
-                };
-                let long = encoding.decode(&src[..pos]);
-                src.advance(pos + 2);
+                let long = src.get_encoded_string(&encoding);
 
                 FrameType::COMM(language, short, long)
-            },
-            _ => None?
+            }
+            _ => None?,
         })
     }
     pub fn get_description(&self) -> String {
@@ -72,8 +61,9 @@ impl FrameType {
 
             FrameType::TXXX(_) => "User defined text information frame",
 
-            FrameType::COMM(_, _, _) => "Comments"
-        }.into()
+            FrameType::COMM(_, _, _) => "Comments",
+        }
+        .into()
     }
 }
 

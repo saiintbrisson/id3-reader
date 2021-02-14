@@ -3,10 +3,10 @@ pub enum EncodingTypes {
     Latin1,
     Utf16Le,
     Utf16Be,
-    Utf8
+    Utf8,
 }
 
-use encoding_rs::{Encoding, WINDOWS_1252, UTF_16LE, UTF_16BE, UTF_8};
+use encoding_rs::{Encoding, UTF_16BE, UTF_16LE, UTF_8, WINDOWS_1252};
 
 #[allow(dead_code)]
 impl EncodingTypes {
@@ -16,7 +16,7 @@ impl EncodingTypes {
             0x01 => EncodingTypes::Utf16Le,
             0x02 => EncodingTypes::Utf16Be,
             0x03 => EncodingTypes::Utf8,
-            _ => None?
+            _ => None?,
         })
     }
     pub fn get_encoding(&self) -> &'static Encoding {
@@ -24,7 +24,7 @@ impl EncodingTypes {
             EncodingTypes::Latin1 => WINDOWS_1252,
             EncodingTypes::Utf16Le => UTF_16LE,
             EncodingTypes::Utf16Be => UTF_16BE,
-            EncodingTypes::Utf8 => UTF_8
+            EncodingTypes::Utf8 => UTF_8,
         }
     }
     pub fn decode(&self, string: &[u8]) -> String {
@@ -32,7 +32,8 @@ impl EncodingTypes {
             EncodingTypes::Latin1 => WINDOWS_1252.decode(string).0,
             EncodingTypes::Utf16Le => UTF_16BE.decode(string).0,
             EncodingTypes::Utf16Be => UTF_16BE.decode_without_bom_handling(string).0,
-            EncodingTypes::Utf8 => UTF_8.decode(string).0
-        }.into()
+            EncodingTypes::Utf8 => UTF_8.decode(string).0,
+        }
+        .into()
     }
 }

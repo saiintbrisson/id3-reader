@@ -7,7 +7,8 @@ extern crate test;
 #[macro_use]
 extern crate bitflags;
 
-pub mod buf_ext;
+mod buf_ext;
+mod encoding;
 mod v1;
 mod v2;
 
@@ -16,5 +17,5 @@ pub use v2::{decoder as v2_decoder, header::Header};
 
 pub struct ID3Version {
     pub v1: bool,
-    pub v2: bool
+    pub v2: bool,
 }
